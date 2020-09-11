@@ -15,19 +15,22 @@ int main(int argc, char *argv[]){
 	scanf("%s", filename);
 
 	// read file
-	file = fopen(filename, "r");
+	if((file = fopen(filename, "r")) == NULL){
+		fprintf(stderr, "error while opening file");
+		exit(EXIT_FAILURE);
+	}
 
 	// read size of input data
 	fscanf(file, "%d", &input);
 
 	// allocating memory for data
 	if ((count = (int *)malloc(input * sizeof(int))) == NULL){
-		printf("Error while allocating memory");
-		exit(-1);
+		fprintf(stderr, "Error while allocating memory");
+		exit(EXIT_FAILURE);
 	}
 	if ((number = (int *)malloc(input * sizeof(int))) == NULL){
-		printf("Error while allocating memory");
-		exit(-1);
+		fprintf(stderr, "Error while allocating memory");
+		exit(EXIT_FAILURE);
 	}
 
 	// initialize array
