@@ -1,4 +1,4 @@
-// 2017116186 ¿¿¿
+// 2017116186 ï¿½ï¿½ï¿½
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,9 +18,9 @@ typedef struct queuenode{
 TREENODE *makeTreeNode(int data); // create new tree node
 void insertTree(TREENODE *tree, TREENODE *newNode); // insert new node in tree
 TREENODE* makeTree(FILE* file); // create tree from input
-QUEUENODE *makeQueueNode(TREENODE *data, int level); // create new queue node
-void insertQueue(QUEUENODE **queue, TREENODE *data, int level); // insert new node in queue
-int getFrontLevel(QUEUENDOE* queue); // get level of front node from queue
+QUEUENODE *makeQueueNode(TREENODE *data, int depth); // create new queue node
+void insertQueue(QUEUENODE **queue, TREENODE *data, int depth); // insert new node in queue
+int getFrontDepth(QUEUENODE* queue); // get depth of front node from queue
 TREENODE *deleteQueue(QUEUENODE **queue); // delete from node from queue
 void solve(QUEUENODE *queue, TREENODE *tree); // solve probelm
 void freeTree(TREENODE **tree); // free allocated memory from tree
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 }
 
 TREENODE *makeTreeNode(int data) {
-	TREENODE *newNode 
+	TREENODE *newNode;
 	
 	// allocate memory
 	if((newNode = (TREENODE *)malloc(sizeof(TREENODE))) == NULL){
@@ -112,28 +112,28 @@ TREENODE* makeTree(FILE* file) {
 	return root;
 }
 
-QUEUENODE *makeQueueNode(TREENODE *data, int level) {
+QUEUENODE *makeQueueNode(TREENODE *data, int depth) {
 	QUEUENODE *newNode;
 	// allocate new node
-	if((newNode = (QUEUENODE *)malloc(sizeof(q_node))) == NULL){
+	if((newNode = (QUEUENODE *)malloc(sizeof(QUEUENODE))) == NULL){
 		fprintf(stderr, "error while allocating memory\n");
 		exit(EXIT_FAILURE);
 	}
 
 	// initialize new node
 	newNode->data = data;
-	newNode->level = level;
+	newNode->depth = depth;
 	newNode->next = NULL;
 
 	return newNode;
 }
 
-void insertQueue(QUEUENODE **queue, TREENODE *data, int level) {
+void insertQueue(QUEUENODE **queue, TREENODE *data, int depth) {
 	QUEUENODE *tempNode;
 	
 	// if queue empty
 	if ((*queue) == NULL) {
-		(*queue) = makeQueueNode(data, level);
+		(*queue) = makeQueueNode(data, depth);
 		return;
 	}
 
@@ -144,24 +144,22 @@ void insertQueue(QUEUENODE **queue, TREENODE *data, int level) {
 	}
 
 	// insert new node at last
-	tempNode->next = makeQueueNode(data, level);
+	tempNode->next = makeQueueNode(data, depth);
 }
 
-int getFrontLevel(QUEUENDOE* queue){
+int getFrontDepth(QUEUENODE* queue){
 	// if queue empty
 	if (queue == NULL){
-		fprintf(stderr, "queue empty\n");
-		exit(EXIT_FAILURE);
+		return -1;
 	}
 
-	return queue->level;
+	return queue->depth;
 }
 
 TREENODE *deleteQueue(QUEUENODE **queue){
 	// if queue empty
 	if ((*queue) == NULL) {
-		fprintf(stderr, "queue empty\n");
-		exit(EXIT_FAILURE);
+		return NULL;
 	}
 
 	TREENODE *data = (*queue)->data;
@@ -176,27 +174,27 @@ TREENODE *deleteQueue(QUEUENODE **queue){
 // solve problem
 void solve(QUEUENODE *queue, TREENODE *tree) {
 	int front;
-	int level = 1;
+	int depth= 1;
 	TREENODE *data;
 
 	while (queue != NULL) {
 		// get data from queue front
-		level = getFrontLevel(queue);
+		depth = getFrontDepth(queue);
 		data = deleteQueue(&queue);
 		if (data == NULL){
 			continue;
 		}
 
 		if (data->left != NULL){
-			insertQueue(&queue, data->left, level + 1);
+			insertQueue(&queue, data->left, depth + 1);
 		}
 		if (data->right != NULL){
-			insertQueue(&queue, data->right, level + 1);
+			insertQueue(&queue, data->right, depth + 1);
 		}
 
 		// if node is the most right node of tree
-		if (level != getFrontLevel(queue)) {
-			printf("(%d %d) ", level, data->data);
+		if (depth != getFrontDepth(queue)) {
+			printf("(%d %d) ", depth, data->data);
 		}
 	}
 	
@@ -207,7 +205,7 @@ void freeTree(TREENODE **tree) {
 	if ((*tree)->left != NULL){
 		freeTree(&(*tree)->left);
 	}
-	if ((*root)->right != NULL){
+	if ((*tree)->right != NULL){
 		freeTree(&(*tree)->right);
 	}
 
